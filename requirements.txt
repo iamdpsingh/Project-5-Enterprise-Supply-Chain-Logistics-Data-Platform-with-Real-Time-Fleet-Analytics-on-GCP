@@ -2,3 +2,4 @@ pandas
 faker
 pyarrow
 numpy
+google-cloud-storage
