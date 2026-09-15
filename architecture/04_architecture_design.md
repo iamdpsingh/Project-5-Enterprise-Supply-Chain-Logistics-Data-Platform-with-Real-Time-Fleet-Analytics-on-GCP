@@ -47,7 +47,8 @@ The platform follows a modern lambda/kappa hybrid architecture on GCP, handling 
                   │              │              │
                   └──────────────┼──────────────┘
                                  ▼
-                         LOOKER STUDIO
+                         CUSTOM WEB APP
+                      (React / Node.js API)
                                  │
                                  ▼
                     SUPPLY CHAIN CONTROL TOWER
@@ -78,7 +79,7 @@ The platform follows a modern lambda/kappa hybrid architecture on GCP, handling 
 - **dbt**: Manages SQL-based transformations from Silver to Gold, including data testing and lineage.
 
 ### 5. Serving & ML Layer
-- **Looker Studio**: Serves dashboards (Executive, Logistics, Fleet, Inventory, Supplier).
+- **Custom Web App**: A custom-built frontend (React/Next.js) and backend API (Node.js/Python) to serve the Supply Chain Control Tower dashboards.
 - **BigQuery ML**: Trains a classification model to predict shipment delays based on feature tables.
 
 ### 6. Orchestration & DevOps

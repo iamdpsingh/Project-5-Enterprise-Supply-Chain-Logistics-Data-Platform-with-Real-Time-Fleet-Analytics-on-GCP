@@ -1,0 +1,10 @@
+supply_chain:
+  target: dev
+  outputs:
+    dev:
+      type: bigquery
+      method: oauth
+      project: supply-chain-logistics-508517
+      dataset: gold
+      location: US
+      threads: 4

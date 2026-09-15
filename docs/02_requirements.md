@@ -23,9 +23,10 @@
 - Maintain the current state of the fleet and active deliveries in Firestore for low-latency operational access.
 - Generate real-time alerts for speed violations, health anomalies, route deviations, and ETA breaches.
 
-### 5. Advanced Analytics & ML
+### 5. Advanced Analytics & Custom Frontend
 - Calculate real-time metrics for fleet utilization, fuel efficiency, and logistics performance.
 - Implement a predictive model using BigQuery ML to forecast shipment delays based on historical data, weather, and traffic.
+- Build a custom web application (React/Next.js for the frontend, Node.js/Python for the backend API) to host the Supply Chain Control Tower, replacing standard BI tools for better DevOps integration and user experience.
 
 ## Non-Functional Requirements
 

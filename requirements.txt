@@ -3,3 +3,10 @@ faker
 pyarrow
 numpy
 google-cloud-storage
+google-cloud-bigquery
+google-cloud-pubsub
+google-cloud-firestore
+pyspark
+apache-beam[gcp]
+pytest
+flake8

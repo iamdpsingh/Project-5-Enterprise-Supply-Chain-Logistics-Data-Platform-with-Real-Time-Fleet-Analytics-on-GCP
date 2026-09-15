@@ -19,7 +19,8 @@ This document outlines the rationale behind the chosen technology stack for the 
 - **Pub/Sub**: Native GCP messaging queue chosen for its serverless scalability and guaranteed at-least-once delivery.
 - **Cloud Run & Docker**: Used to host the Fleet Simulator. Containerization ensures environmental consistency and Cloud Run allows it to run serverlessly.
 
-## 5. Machine Learning
+## 5. Serving & ML Layer
+- **Custom Web App**: Instead of using off-the-shelf BI tools like Looker Studio or Streamlit, the platform utilizes a custom-built full-stack application (e.g., React for frontend, Node.js/Python for backend API) to provide maximum flexibility, DevOps integration, and a premium user experience for the Supply Chain Control Tower.
 - **BigQuery ML**: Selected for shipment delay prediction to bring the compute to the data, avoiding the need to extract large datasets into a separate ML environment.
 
 ## 6. Infrastructure as Code & CI/CD
