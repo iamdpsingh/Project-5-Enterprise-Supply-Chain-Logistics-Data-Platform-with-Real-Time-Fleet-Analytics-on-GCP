@@ -8,40 +8,69 @@ import random
 import math
 from datetime import datetime, timezone
 
-# Configuration
-NUM_VEHICLES = 200
-PUBLISH_INTERVAL = 1  # seconds between batches
+# ── Configuration (20 Lakh scale) ──────────────────────────────────────
+NUM_VEHICLES = 400           # Global fleet (doubled)
+PUBLISH_INTERVAL = 1         # seconds between batches
 EVENTS_PER_BATCH = 50
 
-# Indian city coordinates for realistic routes
+# Global route hubs — major logistics cities across 6 continents
 ROUTE_POINTS = [
-    (28.6139, 77.2090),   # Delhi
-    (19.0760, 72.8777),   # Mumbai
-    (13.0827, 80.2707),   # Chennai
-    (22.5726, 88.3639),   # Kolkata
-    (12.9716, 77.5946),   # Bangalore
-    (17.3850, 78.4867),   # Hyderabad
-    (23.0225, 72.5714),   # Ahmedabad
-    (26.9124, 75.7873),   # Jaipur
+    # North America
+    (40.7128, -74.0060,  'New York',      'North America'),
+    (34.0522, -118.2437, 'Los Angeles',   'North America'),
+    (41.8781, -87.6298,  'Chicago',       'North America'),
+    (29.7604, -95.3698,  'Houston',       'North America'),
+    (43.6532, -79.3832,  'Toronto',       'North America'),
+    (19.4326, -99.1332,  'Mexico City',   'North America'),
+    # South America
+    (-23.5505, -46.6333, 'São Paulo',     'South America'),
+    (-34.6037, -58.3816, 'Buenos Aires',  'South America'),
+    ( -4.2634, -69.9369, 'Bogotá',       'South America'),
+    # Europe
+    (51.5074,  -0.1278,  'London',        'Europe'),
+    (48.8566,   2.3522,  'Paris',         'Europe'),
+    (52.5200,  13.4050,  'Berlin',        'Europe'),
+    (51.9225,   4.4792,  'Rotterdam',     'Europe'),
+    (52.2297,  21.0122,  'Warsaw',        'Europe'),
+    (45.4654,   9.1859,  'Milan',         'Europe'),
+    # Middle East & Africa
+    (25.2048,  55.2708,  'Dubai',         'Middle East & Africa'),
+    (24.7136,  46.6753,  'Riyadh',        'Middle East & Africa'),
+    (41.0082,  28.9784,  'Istanbul',      'Middle East & Africa'),
+    (-26.2041,  28.0473, 'Johannesburg',  'Middle East & Africa'),
+    ( 6.5244,   3.3792,  'Lagos',         'Middle East & Africa'),
+    (30.0444,  31.2357,  'Cairo',         'Middle East & Africa'),
+    # Asia Pacific
+    (31.2304, 121.4737,  'Shanghai',      'Asia Pacific'),
+    (35.6762, 139.6503,  'Tokyo',         'Asia Pacific'),
+    ( 1.3521, 103.8198,  'Singapore',     'Asia Pacific'),
+    (19.0760,  72.8777,  'Mumbai',        'Asia Pacific'),
+    (37.5665, 126.9780,  'Seoul',         'Asia Pacific'),
+    (-6.2088, 106.8456,  'Jakarta',       'Asia Pacific'),
+    (13.7563, 100.5018,  'Bangkok',       'Asia Pacific'),
+    # Australia & Oceania
+    (-33.8688, 151.2093, 'Sydney',        'Australia & Oceania'),
+    (-37.8136, 144.9631, 'Melbourne',     'Australia & Oceania'),
 ]
 
 
 def generate_vehicle_state(vehicle_id: int, step: int) -> dict:
-    """Generate a single telemetry event for a vehicle."""
-    # Simulate movement along a route
+    """Generate a single telemetry event for a vehicle assigned to a global region."""
+    # Each vehicle is pinned to a specific hub city (consistent regional routing)
     route_idx = vehicle_id % len(ROUTE_POINTS)
-    base_lat, base_lon = ROUTE_POINTS[route_idx]
+    base_lat, base_lon, city, region = ROUTE_POINTS[route_idx]
 
-    # Add some movement noise
-    lat = base_lat + math.sin(step * 0.01) * 0.05 + random.gauss(0, 0.001)
-    lon = base_lon + math.cos(step * 0.01) * 0.05 + random.gauss(0, 0.001)
+    # Simulate realistic route movement around the hub
+    lat = base_lat + math.sin(step * 0.01) * 0.5 + random.gauss(0, 0.01)
+    lon = base_lon + math.cos(step * 0.01) * 0.5 + random.gauss(0, 0.01)
 
-    # Speed: normal driving with occasional spikes
-    speed = max(0, random.gauss(65, 15))
+    # Speed varies by region (highway norms differ globally)
+    base_speed = 80 if region in ('Europe', 'Australia & Oceania') else 65
+    speed = max(0, random.gauss(base_speed, 15))
     if random.random() < 0.05:  # 5% chance of speeding
-        speed = random.uniform(100, 140)
+        speed = random.uniform(110, 145)
 
-    # Fuel: slowly decreasing
+    # Fuel: slowly decreasing over time
     fuel = max(5, 100 - (step % 500) * 0.2 + random.gauss(0, 2))
 
     # Engine temp: mostly normal, occasional overheating
@@ -50,13 +79,15 @@ def generate_vehicle_state(vehicle_id: int, step: int) -> dict:
         engine_temp = random.uniform(105, 120)
 
     return {
-        "event_id": f"EVT_{vehicle_id:04d}_{step:08d}",
-        "vehicle_id": f"VEH_{vehicle_id:06d}",
-        "timestamp": datetime.now(timezone.utc).isoformat(),
-        "latitude": round(lat, 6),
-        "longitude": round(lon, 6),
-        "speed_kmh": round(speed, 2),
-        "fuel_level_pct": round(fuel, 2),
+        "event_id":             f"EVT_{vehicle_id:04d}_{step:08d}",
+        "vehicle_id":           f"VEH_{vehicle_id:06d}",
+        "timestamp":            datetime.now(timezone.utc).isoformat(),
+        "latitude":             round(lat, 6),
+        "longitude":            round(lon, 6),
+        "region":               region,
+        "hub_city":             city,
+        "speed_kmh":            round(speed, 2),
+        "fuel_level_pct":       round(fuel, 2),
         "engine_temperature_c": round(engine_temp, 2),
     }
 

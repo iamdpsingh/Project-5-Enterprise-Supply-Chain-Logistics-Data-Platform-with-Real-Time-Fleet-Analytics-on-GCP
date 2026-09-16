@@ -1,7 +1,8 @@
 """
 Synthetic data generator for the supply chain platform.
-Produces ~2.8M records across structured (CSV), semi-structured (JSON/XML),
-and unstructured (text) formats to simulate realistic production data.
+Produces ~20 lakh (2M) records across structured (CSV), semi-structured (JSON/XML),
+and unstructured (text) formats to simulate realistic GLOBAL production data
+covering customers, suppliers, warehouses, and IoT telemetry across 6 continents.
 """
 import os
 import json
@@ -22,16 +23,16 @@ logger = get_logger("data_generation")
 
 fake = Faker()
 
-# Volume configuration
-NUM_CUSTOMERS = 50000
-NUM_PRODUCTS = 10000
-NUM_SUPPLIERS = 500
-NUM_WAREHOUSES = 100
-NUM_VEHICLES = 2000
-NUM_DRIVERS = 2500
-NUM_ORDERS = 500000
-NUM_SHIPMENTS = 500000
-NUM_TELEMETRY = 1000000
+# ── Volume configuration (20 Lakh / 2 Million scale) ──────────────
+NUM_CUSTOMERS  = 80000   # Global enterprise + consumer base
+NUM_PRODUCTS   = 15000   # Expanded SKU catalogue
+NUM_SUPPLIERS  = 800     # Global supplier network
+NUM_WAREHOUSES = 200     # Distribution centres across 6 continents
+NUM_VEHICLES   = 4000    # Global fleet (doubled)
+NUM_DRIVERS    = 5000    # Global driver pool (doubled)
+NUM_ORDERS     = 1000000 # 10 Lakh orders
+NUM_SHIPMENTS  = 1000000 # 10 Lakh shipments
+NUM_TELEMETRY  = 2000000 # 20 Lakh telemetry events (streaming)
 
 # Output directories
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -53,6 +54,22 @@ logger.info("Starting data generation...")
 # ---------------------------------------------------------
 logger.info("Generating dimension tables...")
 
+# ── Global customer distribution across 6 continents ──────────────
+GLOBAL_COUNTRIES = [
+    # North America
+    'USA', 'Canada', 'Mexico',
+    # South America
+    'Brazil', 'Argentina', 'Colombia', 'Chile',
+    # Europe
+    'Germany', 'France', 'UK', 'Netherlands', 'Spain', 'Italy', 'Poland', 'Sweden',
+    # Asia Pacific
+    'China', 'Japan', 'India', 'South Korea', 'Australia', 'Singapore', 'Indonesia', 'Thailand',
+    # Middle East
+    'UAE', 'Saudi Arabia', 'Turkey',
+    # Africa
+    'South Africa', 'Nigeria', 'Kenya', 'Egypt',
+]
+
 customer_ids = generate_ids('CUST', NUM_CUSTOMERS)
 customers_df = pd.DataFrame({
     'customer_id': customer_ids,
@@ -61,11 +78,12 @@ customers_df = pd.DataFrame({
         for _ in range(NUM_CUSTOMERS)
     ],
     'customer_type': np.random.choice(
-        ['B2B', 'B2C'], NUM_CUSTOMERS, p=[0.2, 0.8]
+        ['B2B', 'B2C'], NUM_CUSTOMERS, p=[0.35, 0.65]  # more B2B for global enterprise
     ),
-    'country': np.random.choice(
-        ['USA', 'Canada', 'UK', 'Germany', 'France', 'Australia', 'Japan'],
-        NUM_CUSTOMERS
+    'country': np.random.choice(GLOBAL_COUNTRIES, NUM_CUSTOMERS),
+    'region': np.random.choice(
+        ['North America', 'Europe', 'Asia Pacific', 'South America', 'Middle East & Africa'],
+        NUM_CUSTOMERS, p=[0.25, 0.25, 0.30, 0.10, 0.10]
     ),
     'registration_date': [
         fake.date_between(start_date='-5y', end_date='today')
@@ -106,9 +124,16 @@ suppliers_df = pd.DataFrame({
     'rating': np.round(
         np.random.uniform(1.0, 5.0, NUM_SUPPLIERS), 1
     ),
+    # Global manufacturing hubs
     'country': np.random.choice(
-        ['China', 'Vietnam', 'Mexico', 'India', 'USA', 'Germany', 'Brazil'],
+        ['China', 'Vietnam', 'Mexico', 'India', 'USA', 'Germany',
+         'Brazil', 'Bangladesh', 'Indonesia', 'Thailand', 'Taiwan',
+         'South Korea', 'Poland', 'Turkey', 'Malaysia', 'Philippines'],
         NUM_SUPPLIERS
+    ),
+    'region': np.random.choice(
+        ['North America', 'Europe', 'Asia Pacific', 'South America', 'Middle East & Africa'],
+        NUM_SUPPLIERS, p=[0.15, 0.20, 0.45, 0.10, 0.10]
     )
 })
 suppliers_df.to_csv(
@@ -116,9 +141,30 @@ suppliers_df.to_csv(
 )
 
 warehouse_ids = generate_ids('WHSE', NUM_WAREHOUSES)
+# Global distribution centre cities
+GLOBAL_WAREHOUSE_CITIES = [
+    # North America
+    'Los Angeles', 'Chicago', 'Dallas', 'New York', 'Houston', 'Toronto', 'Mexico City',
+    # Europe
+    'Rotterdam', 'Frankfurt', 'London', 'Paris', 'Warsaw', 'Madrid', 'Milan',
+    # Asia Pacific
+    'Shanghai', 'Singapore', 'Tokyo', 'Sydney', 'Mumbai', 'Seoul', 'Jakarta', 'Bangkok',
+    # Middle East
+    'Dubai', 'Riyadh', 'Istanbul',
+    # South America
+    'São Paulo', 'Buenos Aires', 'Bogotá',
+    # Africa
+    'Johannesburg', 'Lagos', 'Nairobi', 'Cairo',
+]
 warehouses_df = pd.DataFrame({
     'warehouse_id': warehouse_ids,
-    'location': [fake.city() for _ in range(NUM_WAREHOUSES)],
+    'location': [
+        random.choice(GLOBAL_WAREHOUSE_CITIES) for _ in range(NUM_WAREHOUSES)
+    ],
+    'region': np.random.choice(
+        ['North America', 'Europe', 'Asia Pacific', 'South America', 'Middle East & Africa'],
+        NUM_WAREHOUSES, p=[0.25, 0.25, 0.30, 0.10, 0.10]
+    ),
     'capacity_sqft': np.random.randint(10000, 500000, NUM_WAREHOUSES),
     'manager_name': [fake.name() for _ in range(NUM_WAREHOUSES)]
 })
@@ -232,10 +278,32 @@ shipments_df.to_csv(
 # ---------------------------------------------------------
 # IoT Telemetry (NDJSON for streaming simulation)
 # ---------------------------------------------------------
-logger.info("Generating IoT telemetry (NDJSON)...")
+logger.info("Generating IoT telemetry (NDJSON) — GLOBAL coordinates, 20L records...")
 v_ids = np.random.choice(vehicle_ids, NUM_TELEMETRY)
-latitudes = np.round(np.random.uniform(25.0, 49.0, NUM_TELEMETRY), 4)
-longitudes = np.round(np.random.uniform(-125.0, -67.0, NUM_TELEMETRY), 4)
+# ── Global lat/lon bounding boxes per region ───────────────────────
+# Each telemetry event tagged to a real geographic region
+REGION_BOUNDS = [
+    # (lat_min, lat_max, lon_min, lon_max, region_label, weight)
+    (25.0,  49.0, -125.0,  -67.0, 'North America',        0.22),
+    (14.5,  33.0,  -92.0,  -77.0, 'Central America',      0.05),
+    (-34.0, 5.0,  -73.0,  -35.0, 'South America',         0.10),
+    (36.0,  71.0,   -9.0,   40.0, 'Europe',               0.22),
+    (-35.0, 37.0,  -17.0,   51.0, 'Africa',               0.08),
+    (20.0,  55.0,   26.0,   77.0, 'Middle East',          0.06),
+    ( 5.0,  53.0,   68.0,  140.0, 'Asia Pacific',         0.20),
+    (-43.0, -10.0, 113.0,  153.0, 'Australia & Oceania',  0.07),
+]
+region_labels  = [r[4] for r in REGION_BOUNDS]
+region_weights = np.array([r[5] for r in REGION_BOUNDS])
+region_weights /= region_weights.sum()  # normalise
+
+assigned_regions = np.random.choice(len(REGION_BOUNDS), NUM_TELEMETRY, p=region_weights)
+latitudes  = np.zeros(NUM_TELEMETRY)
+longitudes = np.zeros(NUM_TELEMETRY)
+for ri, (lat_min, lat_max, lon_min, lon_max, _, _w) in enumerate(REGION_BOUNDS):
+    mask = assigned_regions == ri
+    latitudes[mask]  = np.round(np.random.uniform(lat_min, lat_max, mask.sum()), 4)
+    longitudes[mask] = np.round(np.random.uniform(lon_min, lon_max, mask.sum()), 4)
 speeds = np.random.normal(85, 15, NUM_TELEMETRY).clip(0, 140)
 fuels = np.random.uniform(5.0, 100.0, NUM_TELEMETRY)
 temps = np.random.normal(90, 5, NUM_TELEMETRY).clip(70, 120)
@@ -245,14 +313,15 @@ with open(
 ) as f:
     for i in range(NUM_TELEMETRY):
         event = {
-            "event_id": str(uuid.uuid4()),
-            "vehicle_id": str(v_ids[i]),
-            "timestamp": datetime.now().isoformat(),
-            "latitude": float(latitudes[i]),
-            "longitude": float(longitudes[i]),
-            "speed_kmh": float(speeds[i]),
-            "fuel_level_pct": float(fuels[i]),
-            "engine_temperature_c": float(temps[i])
+            "event_id":              str(uuid.uuid4()),
+            "vehicle_id":            str(v_ids[i]),
+            "timestamp":             datetime.now().isoformat(),
+            "latitude":              float(latitudes[i]),
+            "longitude":             float(longitudes[i]),
+            "region":                region_labels[assigned_regions[i]],
+            "speed_kmh":             float(round(float(np.random.normal(85, 15)), 2)),
+            "fuel_level_pct":        float(round(float(np.random.uniform(5.0, 100.0)), 2)),
+            "engine_temperature_c":  float(round(float(np.random.normal(90, 5)), 2))
         }
         f.write(json.dumps(event) + "\n")
 
@@ -293,4 +362,11 @@ for i in range(100):
         f.write("- " + fake.sentence() + "\n")
         f.write("Status: Resolved\n")
 
-logger.info(f"Synthetic data generation complete. All files saved to {output_dir}")
+logger.info(
+    f"Synthetic data generation complete — 20 Lakh scale, GLOBAL orientation.\n"
+    f"  Orders:    {NUM_ORDERS:,}\n"
+    f"  Shipments: {NUM_SHIPMENTS:,}\n"
+    f"  Telemetry: {NUM_TELEMETRY:,}\n"
+    f"  Files saved to: {output_dir}"
+)
+

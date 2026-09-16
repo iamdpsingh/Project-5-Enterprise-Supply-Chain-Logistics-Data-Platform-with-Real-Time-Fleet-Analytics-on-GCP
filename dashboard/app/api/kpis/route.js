@@ -47,20 +47,22 @@ export async function GET() {
     await new Promise(resolve => setTimeout(resolve, 800));
     const executionTimeMs = Date.now() - startTime;
 
+    // ── 20 Lakh / 2 Million scale mock values ──────────────────────
     return NextResponse.json({
       metrics: {
-        totalOrders: 543920,
-        totalShipments: 541002,
-        delayedShipments: 42103,
-        totalRevenue: 128450900,
-        activeSuppliers: 485,
-        onTimeDeliveryRate: 92.2
+        totalOrders:        2043920,    // 20 Lakh orders
+        totalShipments:     1987210,    // ~19.8 Lakh shipments
+        delayedShipments:    148650,    // ~7.5% delay rate globally
+        totalRevenue:      485920000,   // $485.9M global revenue
+        activeSuppliers:       800,     // Global supplier network
+        onTimeDeliveryRate:   92.5      // On-time delivery %
       },
       metadata: {
         source: 'BigQuery',
         executionTimeMs,
-        bytesProcessed: '1.42 GB',
-        isMock: true
+        bytesProcessed: '3.84 GB',     // doubled from 10L scale
+        isMock: true,
+        scale: '20L global'
       }
     });
   }
