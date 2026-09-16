@@ -731,6 +731,25 @@ region    = hub.region;                                // 'Europe', 'Asia Pacifi
 
 ---
 
+### Problem 9: Cloud Run Simulator Deployment Failures (IAM & Port 8080)
+
+**Symptom:**  
+Migrating the fleet simulator to run entirely on GCP instead of local Docker resulted in two cascading deployment errors:
+1. `PERMISSION_DENIED: ... does not have storage.objects.get access` when running `gcloud builds submit`.
+2. `Container failed to start and listen on the port defined by the PORT=8080 environment variable` when running `gcloud run deploy`.
+
+**Root Cause:**  
+1. **Cloud Build IAM:** Cloud Build uses the default Compute Engine service account to read the temporary source tarball from Cloud Storage, but in modern GCP projects, default access is heavily restricted.
+2. **Cloud Run Architecture:** The `simulator.py` script was a simple `while` loop that published to Pub/Sub and then exited. Cloud Run *Services* require a long-running web server listening on `$PORT` to be considered "healthy" by Google's infrastructure. It's not meant for simple run-to-completion scripts.
+
+**Solution:**  
+1. **IAM Fix:** Granted `roles/storage.admin` and `roles/artifactregistry.writer` explicitly to the Compute Engine service account using `gcloud projects add-iam-policy-binding`. (Added this to the setup instructions).
+2. **Code Fix:** Instead of re-architecting Terraform to use Cloud Run *Jobs* (which are designed for scripts), added a lightweight built-in Python `http.server` to `simulator.py`. The web server listens on port 8080 in a background daemon thread responding with `200 OK`, satisfying Cloud Run's health checks, while the simulator loop runs continuously in the main thread.
+
+**Lesson:** Cloud Run Services always require a web server, even for background workers or IoT publishers. If you're running a script without HTTP routes, either deploy it as a Cloud Run *Job*, or spoof healthiness by throwing an empty `http.server` in a daemon thread.
+
+---
+
 ## 📄 Deep Dive Documentation
 
 | Document | Description |
