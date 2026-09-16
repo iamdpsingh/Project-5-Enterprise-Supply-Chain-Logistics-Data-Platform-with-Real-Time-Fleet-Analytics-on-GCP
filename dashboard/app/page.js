@@ -469,7 +469,7 @@ function FleetTab({ fleet }) {
                   </div>
                 </td>
                 <td><span className={`badge ${v.engine_status === 'OK' ? 'badge-green' : 'badge-red'}`}>● {v.engine_status ?? 'OK'}</span></td>
-                <td style={{ color: 'var(--txt2)', fontSize: '.78rem' }}>{v.latitude?.toFixed(2)}°N, {v.longitude?.toFixed(2)}°W</td>
+                <td style={{ color: 'var(--txt2)', fontSize: '.78rem' }}>{parseFloat(v.latitude)?.toFixed(2)}°N, {parseFloat(v.longitude)?.toFixed(2)}°W</td>
               </tr>
             ))}
           </tbody>
