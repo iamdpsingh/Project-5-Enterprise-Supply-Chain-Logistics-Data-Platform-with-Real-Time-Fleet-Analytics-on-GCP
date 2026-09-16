@@ -92,8 +92,8 @@ function OverviewTab({ kpis, shipments, fleetStats }) {
       {
         label: 'Total Shipments',
         data: shipments.map(s => s.total),
-        borderColor: 'rgba(59, 130, 246, 1)',
-        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+        borderColor: '#1a73e8', // Google Blue
+        backgroundColor: 'rgba(26, 115, 232, 0.1)',
         fill: true,
         tension: 0.4
       }
@@ -104,8 +104,8 @@ function OverviewTab({ kpis, shipments, fleetStats }) {
     responsive: true, maintainAspectRatio: false,
     plugins: { legend: { display: false } },
     scales: {
-      x: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#94a3b8' } },
-      y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#94a3b8' } }
+      x: { grid: { color: 'rgba(0,0,0,0.05)' }, ticks: { color: '#5f6368' } },
+      y: { grid: { color: 'rgba(0,0,0,0.05)' }, ticks: { color: '#5f6368' } }
     }
   };
 
@@ -169,11 +169,11 @@ function LogisticsTab({ kpis, shipments }) {
             </thead>
             <tbody>
               {[1,2,3,4,5].map(i => (
-                <tr key={i} style={{ borderBottom: '1px solid var(--border-highlight)' }}>
+                <tr key={i} style={{ borderBottom: '1px solid var(--border-color)' }}>
                   <td style={{ padding: '1rem 0', color: 'var(--text-primary)', fontWeight: '500' }}>ORD_{Math.floor(Math.random()*90000)+10000}</td>
                   <td style={{ color: 'var(--text-muted)' }}>2026-09-{10+i}</td>
                   <td style={{ color: 'var(--text-primary)' }}>Warehouse {i}</td>
-                  <td><span style={{ padding: '0.25rem 0.5rem', borderRadius: '4px', background: 'rgba(239,68,68,0.1)', color: 'var(--status-danger)' }}>Delayed</span></td>
+                  <td><span style={{ padding: '0.25rem 0.5rem', borderRadius: '4px', background: 'rgba(217, 48, 37, 0.1)', color: 'var(--status-danger)' }}>Delayed</span></td>
                 </tr>
               ))}
             </tbody>
@@ -208,7 +208,7 @@ function FleetTab({ fleet, stats }) {
         {/* Simulated Map Area */}
         <div className="glass-panel" style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', position: 'relative', overflow: 'hidden' }}>
           <h3 style={{ marginBottom: '1.5rem', color: 'var(--text-primary)', zIndex: 2 }}>Live Telemetry Map (US Region)</h3>
-          <div style={{ flex: 1, minHeight: '400px', position: 'relative', background: '#050505', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
+          <div style={{ flex: 1, minHeight: '400px', position: 'relative', background: '#e8eaed', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
             {/* Simple scatter plot representation for map */}
             {fleet?.map((v, i) => {
               // Normalize lat/lon to percentages for simple plotting
@@ -216,10 +216,10 @@ function FleetTab({ fleet, stats }) {
               const left = `${((v.longitude - -125) / 58) * 100}%`;
               const isSpeeding = v.speed_kmh > 100;
               return (
-                <div key={i} style={{ position: 'absolute', top, left, width: '8px', height: '8px', borderRadius: '50%', background: isSpeeding ? 'var(--status-danger)' : 'var(--accent-primary)', transform: 'translate(-50%, -50%)', boxShadow: `0 0 10px ${isSpeeding ? 'var(--status-danger)' : 'var(--accent-primary)'}` }} title={`${v.id} - ${v.speed_kmh}km/h`}></div>
+                <div key={i} style={{ position: 'absolute', top, left, width: '8px', height: '8px', borderRadius: '50%', background: isSpeeding ? 'var(--status-danger)' : 'var(--accent-primary)', transform: 'translate(-50%, -50%)', boxShadow: `0 0 6px ${isSpeeding ? 'var(--status-danger)' : 'var(--accent-primary)'}` }} title={`${v.id} - ${v.speed_kmh}km/h`}></div>
               )
             })}
-            <div style={{ position: 'absolute', bottom: '1rem', right: '1rem', padding: '0.5rem 1rem', background: 'rgba(0,0,0,0.7)', borderRadius: '4px', fontSize: '0.75rem', border: '1px solid var(--border-color)' }}>
+            <div style={{ position: 'absolute', bottom: '1rem', right: '1rem', padding: '0.5rem 1rem', background: 'rgba(255,255,255,0.9)', borderRadius: '4px', fontSize: '0.75rem', border: '1px solid var(--border-color)', boxShadow: 'var(--shadow-sm)' }}>
               <span style={{ display: 'inline-block', width: '8px', height: '8px', background: 'var(--accent-primary)', borderRadius: '50%', marginRight: '6px' }}></span> Normal 
               <span style={{ display: 'inline-block', width: '8px', height: '8px', background: 'var(--status-danger)', borderRadius: '50%', margin: '0 6px 0 12px' }}></span> Speeding
             </div>
@@ -288,15 +288,15 @@ function KpiCard({ title, value, icon, trend, isDanger, subtitle }) {
 function GcpBadge({ source, time, size, isLive, color, icon }) {
   if (!source) return null;
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '0.75rem', background: 'rgba(255,255,255,0.03)', border: '1px solid var(--border-color)', padding: '0.4rem 0.75rem', borderRadius: '20px' }}>
-      <span style={{ color, display: 'flex', alignItems: 'center', gap: '4px' }}>{icon} {source}</span>
-      <span style={{ color: 'var(--text-muted)' }}>|</span>
-      {size && <><span style={{ color: 'var(--text-secondary)' }}>{size}</span><span style={{ color: 'var(--text-muted)' }}>|</span></>}
+    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '0.75rem', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', padding: '0.4rem 0.75rem', borderRadius: '20px', boxShadow: 'var(--shadow-sm)' }}>
+      <span style={{ color, display: 'flex', alignItems: 'center', gap: '4px', fontWeight: '500' }}>{icon} {source}</span>
+      <span style={{ color: 'var(--border-highlight)' }}>|</span>
+      {size && <><span style={{ color: 'var(--text-secondary)' }}>{size}</span><span style={{ color: 'var(--border-highlight)' }}>|</span></>}
       <span style={{ color: 'var(--text-secondary)' }}>{time}ms</span>
       {isLive && (
         <>
-          <span style={{ color: 'var(--text-muted)' }}>|</span>
-          <span style={{ display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--status-success)' }}>
+          <span style={{ color: 'var(--border-highlight)' }}>|</span>
+          <span style={{ display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--status-success)', fontWeight: '500' }}>
             <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--status-success)', animation: 'pulse-dot 1.5s infinite' }}></div>
             Live
           </span>
@@ -308,10 +308,10 @@ function GcpBadge({ source, time, size, isLive, color, icon }) {
 
 function AlertRow({ icon, text, time }) {
   return (
-    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem', background: 'rgba(255,255,255,0.02)', borderRadius: '6px', border: '1px solid var(--border-color)' }}>
+    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem', background: 'var(--bg-secondary)', borderRadius: '6px', border: '1px solid var(--border-color)', boxShadow: 'var(--shadow-sm)' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
         {icon}
-        <span style={{ fontSize: '0.875rem', color: 'var(--text-primary)' }}>{text}</span>
+        <span style={{ fontSize: '0.875rem', color: 'var(--text-primary)', fontWeight: '500' }}>{text}</span>
       </div>
       <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{time}</span>
     </div>

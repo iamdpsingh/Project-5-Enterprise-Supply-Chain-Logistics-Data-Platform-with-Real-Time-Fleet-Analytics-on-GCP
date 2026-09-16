@@ -1,37 +1,38 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap');
 
 :root {
-  /* Color Palette - Premium Dark Mode */
-  --bg-primary: #09090b;
-  --bg-secondary: #121217;
-  --bg-panel: rgba(255, 255, 255, 0.03);
+  /* Google Cloud / Material Design Palette (Light Theme) */
+  --bg-primary: #f8f9fa; /* Light gray background */
+  --bg-secondary: #ffffff; /* White panels */
+  --bg-panel: #ffffff;
   
-  --text-primary: #f8fafc;
-  --text-secondary: #94a3b8;
-  --text-muted: #475569;
+  --text-primary: #202124; /* Google dark gray */
+  --text-secondary: #5f6368; /* Google medium gray */
+  --text-muted: #80868b;
   
-  --accent-primary: #3b82f6; /* Blue */
-  --accent-glow: rgba(59, 130, 246, 0.5);
+  --accent-primary: #1a73e8; /* Google Blue */
+  --accent-glow: rgba(26, 115, 232, 0.15);
   
-  --status-success: #10b981;
-  --status-warning: #f59e0b;
-  --status-danger: #ef4444;
-  --status-info: #3b82f6;
+  --status-success: #1e8e3e; /* Google Green */
+  --status-warning: #f9ab00; /* Google Yellow */
+  --status-danger: #d93025; /* Google Red */
+  --status-info: #1a73e8;
 
-  --border-color: rgba(255, 255, 255, 0.08);
-  --border-highlight: rgba(255, 255, 255, 0.15);
+  --border-color: #dadce0;
+  --border-highlight: #bdc1c6;
   
   /* Metrics */
-  --border-radius-sm: 6px;
-  --border-radius-md: 12px;
-  --border-radius-lg: 16px;
-  --border-radius-xl: 24px;
+  --border-radius-sm: 4px;
+  --border-radius-md: 8px;
+  --border-radius-lg: 12px;
+  --border-radius-xl: 16px;
   
-  --shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  --shadow-glow: 0 0 20px -5px var(--accent-glow);
+  /* Material Elevation Shadows */
+  --shadow-sm: 0 1px 2px 0 rgba(60,64,67,0.3), 0 1px 3px 1px rgba(60,64,67,0.15);
+  --shadow-md: 0 1px 3px 0 rgba(60,64,67,0.3), 0 4px 8px 3px rgba(60,64,67,0.15);
   
   --transition-fast: 0.15s ease;
-  --transition-normal: 0.25s ease;
+  --transition-normal: 0.25s cubic-bezier(0.4, 0.0, 0.2, 1); /* Material easing */
 }
 
 * {
@@ -41,7 +42,7 @@
 }
 
 body {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
   background-color: var(--bg-primary);
   color: var(--text-primary);
   line-height: 1.5;
@@ -58,40 +59,36 @@ body {
   background: var(--bg-primary);
 }
 ::-webkit-scrollbar-thumb {
-  background: var(--text-muted);
+  background: var(--border-highlight);
   border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--text-secondary);
+  background: var(--text-muted);
 }
 
 /* Utilities */
 .glass-panel {
   background: var(--bg-panel);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
   border: 1px solid var(--border-color);
   border-radius: var(--border-radius-md);
-  transition: border var(--transition-fast), transform var(--transition-fast), box-shadow var(--transition-normal);
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow var(--transition-normal), transform var(--transition-fast);
 }
 
 .glass-panel:hover {
-  border-color: var(--border-highlight);
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-glow);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
 }
 
 .heading-gradient {
-  background: linear-gradient(135deg, #f8fafc 0%, #94a3b8 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: var(--text-primary); /* Remove gradient for cleaner Google look */
+  font-weight: 500;
 }
 
 /* Typography */
 h1, h2, h3, h4, h5, h6 {
-  font-weight: 600;
-  letter-spacing: -0.02em;
+  font-weight: 500;
+  letter-spacing: 0.2px;
 }
 
 /* Layout */
@@ -119,18 +116,5 @@ h1, h2, h3, h4, h5, h6 {
   display: flex;
   flex-direction: column;
   gap: 2rem;
-  position: relative;
-}
-
-/* Add a subtle radial gradient behind the main content for depth */
-.main-content::before {
-  content: '';
-  position: absolute;
-  top: -10%;
-  left: -10%;
-  width: 60%;
-  height: 60%;
-  background: radial-gradient(circle, rgba(59, 130, 246, 0.08) 0%, transparent 60%);
-  z-index: -1;
-  pointer-events: none;
+  background-color: var(--bg-primary);
 }
