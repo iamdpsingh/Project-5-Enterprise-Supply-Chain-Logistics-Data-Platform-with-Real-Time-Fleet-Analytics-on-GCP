@@ -7,6 +7,9 @@ import {
   BarElement, ArcElement, Title, Tooltip, Legend, Filler
 } from 'chart.js';
 import { Line, Bar, Doughnut } from 'react-chartjs-2';
+import dynamic from 'next/dynamic';
+
+const MapComponent = dynamic(() => import('./MapComponent'), { ssr: false });
 import {
   LayoutDashboard, Package, Truck, Activity, Database,
   AlertTriangle, Zap, TrendingUp, TrendingDown, DollarSign,
@@ -345,9 +348,9 @@ function FleetTab({ fleet }) {
   const vehicles = rawVehicles.length > 0
     ? rawVehicles.map((v, i) => ({
         ...v,
-        latitude:  parseFloat(v.latitude)  || GLOBAL_SEEDS[i % GLOBAL_SEEDS.length].lat,
-        longitude: parseFloat(v.longitude) || GLOBAL_SEEDS[i % GLOBAL_SEEDS.length].lon,
-        region:    GLOBAL_SEEDS[i % GLOBAL_SEEDS.length].region,
+        latitude:  v.latitude !== undefined && v.latitude !== null ? parseFloat(v.latitude) : GLOBAL_SEEDS[i % GLOBAL_SEEDS.length].lat,
+        longitude: v.longitude !== undefined && v.longitude !== null ? parseFloat(v.longitude) : GLOBAL_SEEDS[i % GLOBAL_SEEDS.length].lon,
+        region:    v.region || GLOBAL_SEEDS[i % GLOBAL_SEEDS.length].region,
         speed_kmh: parseInt(v.speed_kmh, 10) || 70,
         fuel_level_pct: parseInt(v.fuel_level_pct, 10) || 60,
       }))
@@ -468,48 +471,20 @@ function FleetTab({ fleet }) {
       {/* Global Map */}
       <div className="card" style={{ padding: '1.25rem' }}>
         <div className="section-title"><Truck size={14} /> Live Vehicle Telemetry — {region}</div>
-        <div className="map-canvas" style={{ height: 370, position: 'relative' }}>
-          {/* Subtle grid lines */}
-          {[20, 40, 60, 80].map(p => (
-            <div key={`h${p}`} style={{ position: 'absolute', left: 0, right: 0, top: `${p}%`, height: 1, background: 'rgba(59,130,246,.05)', pointerEvents: 'none' }} />
-          ))}
-          {[20, 40, 60, 80].map(p => (
-            <div key={`v${p}`} style={{ position: 'absolute', top: 0, bottom: 0, left: `${p}%`, width: 1, background: 'rgba(59,130,246,.05)', pointerEvents: 'none' }} />
-          ))}
-
-          {/* Vehicle dots */}
-          {filtered.map((v, i) => {
-            const pos   = toPos(v.latitude, v.longitude);
-            const spd   = v.speed_kmh > 100;
-            const fuel  = v.fuel_level_pct < 20;
-            const eng   = v.engine_status === 'WARNING';
-            const color = spd ? 'var(--red)' : (fuel || eng) ? 'var(--amber)' : 'var(--blue)';
-            const isSel = selected?.id === v.id;
-            return (
-              <div
-                key={i}
-                onClick={() => setSelected(isSel ? null : v)}
-                style={{
-                  position: 'absolute', ...pos,
-                  width: isSel ? 14 : 9, height: isSel ? 14 : 9,
-                  borderRadius: '50%', background: color,
-                  boxShadow: `0 0 ${isSel ? 20 : 8}px ${color}`,
-                  transform: 'translate(-50%,-50%)',
-                  cursor: 'pointer', zIndex: isSel ? 10 : 1,
-                  border: isSel ? '2px solid white' : 'none',
-                  transition: 'all .2s',
-                }}
-                title={`${v.id} · ${v.speed_kmh} km/h · Fuel ${v.fuel_level_pct}%`}
-              />
-            );
-          })}
+        <div className="map-canvas" style={{ height: 370, position: 'relative', overflow: 'hidden', borderRadius: '10px' }}>
+          <MapComponent 
+            vehicles={filtered} 
+            regionBounds={r} 
+            selected={selected} 
+            setSelected={setSelected} 
+          />
 
           {/* Selected vehicle tooltip */}
           {selected && (
-            <div style={{ position: 'absolute', top: 12, left: 12, width: 220, background: 'rgba(8,10,20,.94)', backdropFilter: 'blur(14px)', border: '1px solid rgba(255,255,255,.15)', borderRadius: 10, padding: '1rem', zIndex: 20 }}>
+            <div style={{ position: 'absolute', top: 12, left: 12, width: 220, background: 'rgba(8,10,20,.94)', backdropFilter: 'blur(14px)', border: '1px solid rgba(255,255,255,.15)', borderRadius: 10, padding: '1rem', zIndex: 10000 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '.75rem' }}>
                 <span style={{ fontFamily: 'monospace', fontWeight: 700, color: 'var(--blue)', fontSize: '.9rem' }}>{selected.id}</span>
-                <button onClick={() => setSelected(null)} style={{ background: 'none', border: 'none', color: 'var(--txt2)', cursor: 'pointer', fontSize: '1rem', lineHeight: 1 }}>✕</button>
+                <button onClick={() => setSelected(null)} style={{ background: 'none', border: 'none', color: 'var(--txt2)', cursor: 'pointer', fontSize: '1rem', lineHeight: 1, zIndex: 10000 }}>✕</button>
               </div>
               {[
                 { l: 'Speed',    v: `${selected.speed_kmh} km/h`,       c: selected.speed_kmh > 100 ? 'var(--red)' : 'var(--green)' },

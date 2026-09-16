@@ -10,3 +10,5 @@ pyspark
 apache-beam[gcp]
 pytest
 flake8
+dbt-bigquery
+apache-airflow

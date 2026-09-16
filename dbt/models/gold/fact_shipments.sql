@@ -1,7 +1,7 @@
 {{
   config(
     materialized='table',
-    partition_by={'field': 'dispatch_date', 'data_type': 'date'},
+    partition_by={'field': 'dispatch_date', 'data_type': 'timestamp', 'granularity': 'day'},
     cluster_by=['vehicle_id', 'warehouse_id']
   )
 }}
