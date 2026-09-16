@@ -1,16 +1,21 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800&display=swap');
+/* Skill: ui-ux-pro-max → Fira Code + Fira Sans for dashboards/analytics/data */
+@import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Fira+Sans:wght@300;400;500;600;700&display=swap');
 
 /* ─── CSS Reset & Variables ─────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  --bg:          #07090e;
-  --bg-card:     rgba(255,255,255,0.035);
-  --bg-card-hov: rgba(255,255,255,0.06);
-  --border:      rgba(255,255,255,0.08);
-  --border-hov:  rgba(255,255,255,0.18);
+  /* Skill: OLED-grade black per high-end-visual-design + ui-ux-pro-max */
+  --bg:          #050505;
+  --bg-card:     rgba(255,255,255,0.038);
+  --bg-card-hov: rgba(255,255,255,0.068);
+  --border:      rgba(255,255,255,0.085);
+  --border-hov:  rgba(255,255,255,0.20);
 
-  --blue:    #3b82f6;
+  /* Skill palette: Primary #3B82F6, Secondary #60A5FA, CTA #F97316 */
+  --blue:    #3B82F6;
+  --blue2:   #60A5FA;
+  --orange:  #F97316;   /* skill CTA accent */
   --purple:  #8b5cf6;
   --green:   #10b981;
   --amber:   #f59e0b;
@@ -22,13 +27,15 @@
   --txt3: #52525b;
 
   --sidebar-w: 240px;
-  --ease: cubic-bezier(.4,0,.2,1);
+  /* Skill: premium cubic-bezier from high-end-visual-design */
+  --ease: cubic-bezier(.32,.72,0,1);
 }
 
 html, body { height: 100%; }
 
 body {
-  font-family: 'Inter', sans-serif;
+  /* Skill: Fira Sans for body text — optimized for dashboards */
+  font-family: 'Fira Sans', -apple-system, sans-serif;
   background: var(--bg);
   background-image:
     radial-gradient(ellipse 60% 50% at 10% 0%,  rgba(59,130,246,.10) 0%, transparent 60%),
@@ -162,7 +169,8 @@ body {
 .kpi-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; }
 .kpi-label  { font-size: .75rem; font-weight: 500; color: var(--txt2); text-transform: uppercase; letter-spacing: .06em; }
 .kpi-icon   { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; }
-.kpi-value  { font-size: 1.8rem; font-weight: 800; letter-spacing: -.03em; line-height: 1; margin-bottom: .3rem; }
+/* Skill: Fira Code for numeric KPI values — dashboard/data optimized */
+.kpi-value  { font-size: 1.8rem; font-weight: 700; font-family: 'Fira Code', monospace; letter-spacing: -.02em; line-height: 1; margin-bottom: .3rem; }
 .kpi-trend  { font-size: .75rem; font-weight: 500; display: flex; align-items: center; gap: .3rem; }
 .kpi-trend.up   { color: var(--green); }
 .kpi-trend.down { color: var(--red);   }
@@ -192,7 +200,9 @@ body {
   text-transform: uppercase; letter-spacing: .06em;
   border-bottom: 1px solid var(--border);
 }
-.data-table td { padding: .75rem; border-bottom: 1px solid rgba(255,255,255,.04); color: var(--txt1); }
+.data-table td { padding: .75rem; border-bottom: 1px solid rgba(255,255,255,.04); color: var(--txt1); cursor: default; }
+/* Skill: cursor-pointer on all clickable rows */
+.data-table tr.clickable { cursor: pointer; }
 .data-table tr:hover td { background: rgba(255,255,255,.02); }
 .data-table tr:last-child td { border-bottom: none; }
 
@@ -279,3 +289,20 @@ body {
   content: ''; position: absolute; right: -4px; top: -4px;
   border: 5px solid transparent; border-left-color: var(--purple);
 }
+
+/* ─── Skill: prefers-reduced-motion (ui-ux-pro-max checklist) ── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .01ms !important;
+    transition-duration: .01ms !important;
+  }
+  .fade-in { animation: none; }
+}
+
+/* ─── Skill: Fira Code for inline data / monospace values ─────── */
+.data-value { font-family: 'Fira Code', monospace; font-size: .78rem; }
+
+/* ─── Skill: minimal glow on live data (text-shadow: 0 0 10px) ── */
+.glow-blue  { text-shadow: 0 0 10px rgba(59,130,246,.65); }
+.glow-green { text-shadow: 0 0 10px rgba(16,185,129,.65); }
+.glow-red   { text-shadow: 0 0 10px rgba(239,68,68,.50);  }
