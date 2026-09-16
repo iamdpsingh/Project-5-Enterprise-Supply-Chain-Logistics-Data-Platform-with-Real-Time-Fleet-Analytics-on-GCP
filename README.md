@@ -373,6 +373,25 @@ python quality/quality_checks.py
 
 ### 7. Run the Fleet Simulator (IoT Streaming)
 
+Before running Cloud Build for the first time, ensure the default Compute Engine service account has the necessary permissions to read the source from Cloud Storage and push the image to Artifact Registry:
+
+```bash
+# Get your project number
+PROJECT_NUMBER=$(gcloud projects describe YOUR_PROJECT_ID --format="value(projectNumber)")
+
+# Grant Storage Admin (for Cloud Build temp bucket)
+gcloud projects add-iam-policy-binding YOUR_PROJECT_ID \
+    --member="serviceAccount:${PROJECT_NUMBER}-compute@developer.gserviceaccount.com" \
+    --role="roles/storage.admin"
+
+# Grant Artifact Registry Writer (to push the image)
+gcloud projects add-iam-policy-binding YOUR_PROJECT_ID \
+    --member="serviceAccount:${PROJECT_NUMBER}-compute@developer.gserviceaccount.com" \
+    --role="roles/artifactregistry.writer"
+```
+
+Then submit the build and deploy:
+
 ```bash
 # Local mode (prints to stdout)
 python fleet_simulator/simulator.py
