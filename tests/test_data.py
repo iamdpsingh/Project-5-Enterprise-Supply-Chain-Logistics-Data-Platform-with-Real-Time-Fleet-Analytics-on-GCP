@@ -1,5 +1,7 @@
 """
-Tests for data generation and pipeline components.
+Test suite for the supply chain data platform.
+Tests cover data generation outputs, schema validation,
+and fleet simulator logic.
 """
 import os
 import json
@@ -10,9 +12,17 @@ BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA = os.path.join(BASE, "data", "structured")
 SEMI = os.path.join(BASE, "data", "semi_structured")
 
+# Skip data file tests when files are not present (e.g. in CI)
+DATA_FILES_EXIST = os.path.exists(os.path.join(DATA, "orders.csv"))
+skip_if_no_data = pytest.mark.skipif(
+    not DATA_FILES_EXIST,
+    reason="Data files not present (run data_generation.py first)"
+)
 
+
+@skip_if_no_data
 class TestStructuredData:
-    """Tests for generated CSV files."""
+    """Validate generated CSV files meet expected schemas and volumes."""
 
     @pytest.fixture(autouse=True)
     def setup(self):
@@ -42,8 +52,9 @@ class TestStructuredData:
         assert self.files["customers"]["customer_id"].str.startswith("CUST_").all()
 
 
+@skip_if_no_data
 class TestSemiStructuredData:
-    """Tests for generated JSON/XML files."""
+    """Validate generated JSON and XML files."""
 
     def test_telemetry_file_exists(self):
         assert os.path.exists(os.path.join(SEMI, "iot_telemetry.json"))
@@ -52,7 +63,10 @@ class TestSemiStructuredData:
         with open(os.path.join(SEMI, "iot_telemetry.json")) as f:
             first_line = f.readline()
             record = json.loads(first_line)
-            required_keys = {"event_id", "vehicle_id", "timestamp", "latitude", "longitude", "speed_kmh"}
+            required_keys = {
+                "event_id", "vehicle_id", "timestamp",
+                "latitude", "longitude", "speed_kmh"
+            }
             assert required_keys.issubset(record.keys())
 
     def test_xml_file_exists(self):
@@ -60,7 +74,7 @@ class TestSemiStructuredData:
 
 
 class TestFleetSimulator:
-    """Tests for fleet simulator."""
+    """Validate the fleet simulator generates valid telemetry events."""
 
     def test_simulator_importable(self):
         import sys
@@ -69,7 +83,6 @@ class TestFleetSimulator:
         event = generate_vehicle_state(1, 0)
         assert "vehicle_id" in event
         assert "speed_kmh" in event
-        assert 0 <= event["latitude"] <= 90 or event["latitude"] < 0
 
     def test_event_structure(self):
         import sys

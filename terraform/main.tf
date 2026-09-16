@@ -32,7 +32,10 @@ resource "google_storage_bucket" "data_lake" {
 
   lifecycle_rule {
     condition { age = 365 }
-    action { type = "SetStorageClass" storage_class = "NEARLINE" }
+    action {
+      type          = "SetStorageClass"
+      storage_class = "NEARLINE"
+    }
   }
 }
 
