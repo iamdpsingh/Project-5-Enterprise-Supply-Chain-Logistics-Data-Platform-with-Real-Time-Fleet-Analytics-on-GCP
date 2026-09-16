@@ -1,16 +1,17 @@
 """
-PySpark Transformations — Phase 4
-Reads raw CSV data, cleanses, joins, deduplicates, and writes Parquet to processed zone.
+PySpark batch transformations for the supply chain platform.
+Reads raw CSV/JSON data, deduplicates, cleanses, joins across
+business domains, and writes optimised Parquet to the processed zone.
 """
 import os
 import sys
 from pyspark.sql import functions as F
-from pyspark.sql.types import TimestampType, FloatType, IntegerType
+from pyspark.sql.types import TimestampType, FloatType
 
-# Add project root to path
+# Allow sibling module imports when running as a standalone script
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from spark_config import get_spark
-from quality_checks import check_nulls, check_duplicates, split_valid_invalid
+from spark_config import get_spark  # noqa: E402
+from quality_checks import check_duplicates, split_valid_invalid  # noqa: E402
 
 # ---------------------------------------------------------------------------
 # Paths
@@ -26,21 +27,21 @@ os.makedirs(REJECTED, exist_ok=True)
 
 
 def main():
-    spark = get_spark("SupplyChain_Phase4")
+    spark = get_spark("SupplyChainTransformations")
 
     # ------------------------------------------------------------------
-    # 1. LOAD RAW CSVs
+    # Load raw CSVs and deduplicate by primary key
     # ------------------------------------------------------------------
     tables = {
         "customers": ("customers.csv", ["customer_id"]),
-        "products":  ("products.csv",  ["product_id"]),
-        "suppliers": ("suppliers.csv",  ["supplier_id"]),
-        "warehouses":("warehouses.csv", ["warehouse_id"]),
-        "vehicles":  ("vehicles.csv",   ["vehicle_id"]),
-        "drivers":   ("drivers.csv",    ["driver_id"]),
-        "orders":    ("orders.csv",     ["order_id"]),
-        "order_items":("order_items.csv",["order_id", "product_id"]),
-        "shipments": ("shipments.csv",  ["shipment_id"]),
+        "products": ("products.csv", ["product_id"]),
+        "suppliers": ("suppliers.csv", ["supplier_id"]),
+        "warehouses": ("warehouses.csv", ["warehouse_id"]),
+        "vehicles": ("vehicles.csv", ["vehicle_id"]),
+        "drivers": ("drivers.csv", ["driver_id"]),
+        "orders": ("orders.csv", ["order_id"]),
+        "order_items": ("order_items.csv", ["order_id", "product_id"]),
+        "shipments": ("shipments.csv", ["shipment_id"]),
     }
 
     dfs = {}
@@ -49,7 +50,6 @@ def main():
         print(f"Loading {name} from {path}...")
         df = spark.read.csv(path, header=True, inferSchema=True)
 
-        # Deduplicate
         df = check_duplicates(df, keys)
         valid, dupes = split_valid_invalid(df, ["_is_duplicate"])
 
@@ -57,13 +57,13 @@ def main():
             dupes.write.mode("overwrite").parquet(
                 os.path.join(REJECTED, f"{name}_duplicates")
             )
-            print(f"  ⚠ {name}: {dupes.count()} duplicates quarantined.")
+            print(f"  WARNING  {name}: {dupes.count()} duplicates quarantined.")
 
         dfs[name] = valid
-        print(f"  ✓ {name}: {valid.count()} clean rows.")
+        print(f"  OK  {name}: {valid.count()} clean rows.")
 
     # ------------------------------------------------------------------
-    # 2. CLEANSE — Cast types & standardize
+    # Cast types and standardise values
     # ------------------------------------------------------------------
     dfs["orders"] = (
         dfs["orders"]
@@ -80,7 +80,7 @@ def main():
     )
 
     # ------------------------------------------------------------------
-    # 3. JOINS — Enriched order-shipment dataset
+    # Enrichment joins across business domains
     # ------------------------------------------------------------------
     enriched_orders = (
         dfs["orders"]
@@ -115,7 +115,7 @@ def main():
     )
 
     # ------------------------------------------------------------------
-    # 4. AGGREGATIONS
+    # Aggregations
     # ------------------------------------------------------------------
     order_summary = (
         dfs["orders"]
@@ -128,30 +128,30 @@ def main():
     )
 
     # ------------------------------------------------------------------
-    # 5. WRITE PARQUET (to processed zone)
+    # Write all tables to Parquet (processed zone)
     # ------------------------------------------------------------------
     outputs = {
-        "customers":          dfs["customers"],
-        "products":           dfs["products"],
-        "suppliers":          dfs["suppliers"],
-        "warehouses":         dfs["warehouses"],
-        "vehicles":           dfs["vehicles"],
-        "drivers":            dfs["drivers"],
-        "orders":             dfs["orders"],
-        "order_items":        dfs["order_items"],
-        "shipments":          dfs["shipments"],
-        "enriched_orders":    enriched_orders,
+        "customers": dfs["customers"],
+        "products": dfs["products"],
+        "suppliers": dfs["suppliers"],
+        "warehouses": dfs["warehouses"],
+        "vehicles": dfs["vehicles"],
+        "drivers": dfs["drivers"],
+        "orders": dfs["orders"],
+        "order_items": dfs["order_items"],
+        "shipments": dfs["shipments"],
+        "enriched_orders": enriched_orders,
         "enriched_shipments": enriched_shipments,
-        "order_summary":      order_summary,
+        "order_summary": order_summary,
     }
 
     for name, df in outputs.items():
         out_path = os.path.join(PROCESSED, name)
-        print(f"Writing {name} → {out_path}")
+        print(f"Writing {name} -> {out_path}")
         df.write.mode("overwrite").parquet(out_path)
 
     # ------------------------------------------------------------------
-    # 6. IoT TELEMETRY (JSON → Parquet)
+    # IoT telemetry (JSON -> Parquet)
     # ------------------------------------------------------------------
     print("Processing IoT telemetry JSON...")
     telemetry = (
@@ -162,9 +162,9 @@ def main():
         .withColumn("engine_temperature_c", F.col("engine_temperature_c").cast(FloatType()))
     )
     telemetry.write.mode("overwrite").parquet(os.path.join(PROCESSED, "iot_telemetry"))
-    print(f"  ✓ IoT telemetry: {telemetry.count()} events processed.")
+    print(f"  OK  IoT telemetry: {telemetry.count()} events processed.")
 
-    print("\n✅ Phase 4 complete — all data processed to Parquet.")
+    print("\nDone. All data processed to Parquet.")
     spark.stop()
 
 

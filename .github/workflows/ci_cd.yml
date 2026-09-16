@@ -39,7 +39,7 @@ jobs:
       - uses: hashicorp/setup-terraform@v3
 
       - name: Terraform Init
-        run: terraform init
+        run: terraform init -backend=false
         working-directory: terraform
 
       - name: Terraform Validate
@@ -70,7 +70,9 @@ jobs:
 
       - name: Deploy Fleet Simulator
         run: |
-          gcloud builds submit --tag ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/fleet-simulator/simulator:latest ./fleet_simulator
+          gcloud builds submit \
+            --tag ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/fleet-simulator/simulator:latest \
+            ./fleet_simulator
           gcloud run deploy fleet-simulator \
             --image ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/fleet-simulator/simulator:latest \
             --region ${{ env.REGION }} \

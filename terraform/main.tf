@@ -6,6 +6,7 @@ terraform {
       version = "~> 5.0"
     }
   }
+  backend "local" {}
 }
 
 variable "project_id" {
@@ -62,8 +63,8 @@ resource "google_pubsub_subscription" "fleet_telemetry_sub" {
   name  = "fleet-telemetry-sub"
   topic = google_pubsub_topic.fleet_telemetry.id
 
-  ack_deadline_seconds = 20
-  message_retention_duration = "604800s"  # 7 days
+  ack_deadline_seconds       = 20
+  message_retention_duration = "604800s"
 }
 
 # ==================== SERVICE ACCOUNTS ====================

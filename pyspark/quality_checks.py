@@ -1,10 +1,11 @@
 """
-Data Quality helpers for PySpark pipelines.
-Separates valid/invalid rows and writes rejects to quarantine.
+Reusable data quality helpers for PySpark pipelines.
+Provides functions to flag nulls, range violations, and duplicates,
+then split DataFrames into valid/rejected sets.
 """
 from pyspark.sql import DataFrame
 from pyspark.sql import functions as F
-from typing import Dict, List, Tuple, Optional
+from typing import List, Tuple
 
 
 def check_nulls(df: DataFrame, columns: List[str]) -> DataFrame:
