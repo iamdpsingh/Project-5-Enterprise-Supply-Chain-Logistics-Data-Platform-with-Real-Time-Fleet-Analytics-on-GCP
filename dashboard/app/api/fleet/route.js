@@ -40,7 +40,7 @@ export async function GET() {
       metadata: { source: 'Firestore', executionTimeMs }
     });
   } catch (error) {
-    console.warn("Firestore failed, returning mock fleet data", error.message);
+    // Return mock data seamlessly without spamming the terminal
     
     // Generate mock fleet data
     const vehicles = [];
