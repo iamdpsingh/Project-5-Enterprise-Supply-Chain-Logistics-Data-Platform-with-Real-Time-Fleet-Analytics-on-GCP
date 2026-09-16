@@ -148,10 +148,36 @@ def run_pubsub(project_id: str, topic_id: str, duration_seconds: int = 60):
 
 if __name__ == "__main__":
     import sys
+    import os
+    import threading
+    from http.server import HTTPServer, BaseHTTPRequestHandler
+
+    class HealthCheckHandler(BaseHTTPRequestHandler):
+        def do_GET(self):
+            self.send_response(200)
+            self.end_headers()
+            self.wfile.write(b"OK")
+        
+        # Suppress logging of health checks to keep logs clean
+        def log_message(self, format, *args):
+            pass
+
+    def start_health_server():
+        port = int(os.environ.get("PORT", 8080))
+        server = HTTPServer(("0.0.0.0", port), HealthCheckHandler)
+        print(f"Started health check server on port {port}")
+        server.serve_forever()
+
     if len(sys.argv) > 1 and sys.argv[1] == "--pubsub":
-        project = sys.argv[2] if len(sys.argv) > 2 else "supply-chain-logistics-508517"
-        topic = sys.argv[3] if len(sys.argv) > 3 else "fleet-telemetry"
-        duration = int(sys.argv[4]) if len(sys.argv) > 4 else 60
+        # Start health check server in a background thread so Cloud Run knows the container is ready
+        threading.Thread(target=start_health_server, daemon=True).start()
+        
+        # Use env vars injected by Terraform, or fall back to sys args/defaults
+        project = os.environ.get("PROJECT_ID", sys.argv[2] if len(sys.argv) > 2 else "supply-chain-logistics-508517")
+        topic = os.environ.get("TOPIC_ID", sys.argv[3] if len(sys.argv) > 3 else "fleet-telemetry")
+        
+        # Run for 24 hours in the cloud instead of just 60 seconds
+        duration = int(sys.argv[4]) if len(sys.argv) > 4 else 86400
         run_pubsub(project, topic, duration)
     else:
         run_local(num_events=500)
