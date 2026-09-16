@@ -113,6 +113,15 @@ resource "google_project_iam_member" "composer_bq" {
   member  = "serviceAccount:${google_service_account.composer_sa.email}"
 }
 
+# ==================== ARTIFACT REGISTRY ====================
+
+resource "google_artifact_registry_repository" "fleet_repo" {
+  location      = var.region
+  repository_id = "fleet-simulator"
+  description   = "Docker repository for fleet simulator"
+  format        = "DOCKER"
+}
+
 # ==================== CLOUD RUN ====================
 
 resource "google_cloud_run_v2_service" "fleet_simulator" {
@@ -123,7 +132,9 @@ resource "google_cloud_run_v2_service" "fleet_simulator" {
     service_account = google_service_account.cloud_run_sa.email
 
     containers {
-      image = "${var.region}-docker.pkg.dev/${var.project_id}/fleet-simulator/simulator:latest"
+      # Use a placeholder image for initial Terraform provisioning to avoid chicken-and-egg deployment errors.
+      # The actual image is built and deployed later via Cloud Build.
+      image = "us-docker.pkg.dev/cloudrun/container/hello"
 
       env {
         name  = "PROJECT_ID"

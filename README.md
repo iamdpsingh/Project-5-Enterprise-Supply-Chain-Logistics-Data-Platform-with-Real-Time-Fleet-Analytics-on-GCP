@@ -377,12 +377,13 @@ python quality/quality_checks.py
 # Local mode (prints to stdout)
 python fleet_simulator/simulator.py
 
-# Docker mode (for Cloud Run deployment)
-docker build -t fleet-simulator ./fleet_simulator
-docker run fleet-simulator
+# Cloud Build & Deploy (Runs entirely on GCP, no local Docker needed)
+gcloud builds submit --tag us-central1-docker.pkg.dev/YOUR_PROJECT_ID/fleet-simulator/simulator:latest ./fleet_simulator
 
-# Push to Pub/Sub (requires GCP credentials)
-python fleet_simulator/simulator.py --pubsub YOUR_PROJECT_ID fleet-telemetry 300
+# Deploy to Cloud Run
+gcloud run deploy fleet-simulator \
+    --image us-central1-docker.pkg.dev/YOUR_PROJECT_ID/fleet-simulator/simulator:latest \
+    --region us-central1
 ```
 
 ### 8. dbt Transformations
