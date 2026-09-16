@@ -3,7 +3,8 @@
 # 🌐 Enterprise Supply Chain & Logistics Data Platform
 **End-to-End Batch & Streaming Data Engineering on Google Cloud Platform**
 
-[![CI/CD Pipeline](https://github.com/iamdpsingh/Project-5-Enterprise-Supply-Chain-Logistics-Data-Platform-with-Real-Time-Fleet-Analytics-on-GCP/actions/workflows/ci_cd.yml/badge.svg)](https://github.com/iamdpsingh/Project-5-Enterprise-Supply-Chain-Logistics-Data-Platform-with-Real-Time-Fleet-Analytics-on-GCP/actions/workflows/ci_cd.yml)
+[![GCP](https://img.shields.io/badge/Google_Cloud-4285F4?style=flat&logo=google-cloud&logoColor=white)](https://cloud.google.com)
+[![BigQuery](https://img.shields.io/badge/Data_Warehouse-BigQuery-669DF6?style=flat&logo=google-cloud&logoColor=white)](https://cloud.google.com/bigquery)
 [![Data Volume](https://img.shields.io/badge/Data%20Volume-~2.8M%20Records-blue)](#-data-scale--generation)
 [![Infrastructure](https://img.shields.io/badge/IaC-Terraform-7B42BC)](#-infrastructure-as-code)
 [![Dashboard](https://img.shields.io/badge/Dashboard-Next.js%20%7C%20React-000000)](#-custom-supply-chain-control-tower)
