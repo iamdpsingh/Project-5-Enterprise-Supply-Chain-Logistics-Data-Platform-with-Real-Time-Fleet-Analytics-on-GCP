@@ -7,12 +7,18 @@ import os
 import json
 import uuid
 import random
+import sys
+from datetime import datetime
 
 import numpy as np
 import pandas as pd
 from faker import Faker
-from datetime import datetime
 
+# Add project root to sys.path so we can import utils
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from utils.logger import get_logger
+
+logger = get_logger("data_generation")
 
 fake = Faker()
 
@@ -29,22 +35,23 @@ NUM_TELEMETRY = 1000000
 
 # Output directories
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-STRUCTURED_DIR = os.path.join(BASE_DIR, 'data', 'structured')
-SEMI_STRUCTURED_DIR = os.path.join(BASE_DIR, 'data', 'semi_structured')
-UNSTRUCTURED_DIR = os.path.join(BASE_DIR, 'data', 'unstructured')
-SCHEMAS_DIR = os.path.join(BASE_DIR, 'data', 'schemas')
+output_dir = os.path.join(BASE_DIR, 'data')
+STRUCTURED_DIR = os.path.join(output_dir, 'structured')
+SEMI_STRUCTURED_DIR = os.path.join(output_dir, 'semi_structured')
+UNSTRUCTURED_DIR = os.path.join(output_dir, 'unstructured')
+SCHEMAS_DIR = os.path.join(output_dir, 'schemas')
 
 
 def generate_ids(prefix, count):
     return [f"{prefix}_{i:06d}" for i in range(1, count + 1)]
 
 
-print("Starting data generation...")
+logger.info("Starting data generation...")
 
 # ---------------------------------------------------------
 # Dimension Tables
 # ---------------------------------------------------------
-print("Generating dimension tables...")
+logger.info("Generating dimension tables...")
 
 customer_ids = generate_ids('CUST', NUM_CUSTOMERS)
 customers_df = pd.DataFrame({
@@ -158,7 +165,7 @@ drivers_df.to_csv(
 # ---------------------------------------------------------
 # Fact Tables (Orders, Order Items, Shipments)
 # ---------------------------------------------------------
-print("Generating fact tables (this may take a minute)...")
+logger.info("Generating fact tables (this may take a minute)...")
 
 order_ids = generate_ids('ORD', NUM_ORDERS)
 start_ts = datetime.strptime('2023-01-01', '%Y-%m-%d').timestamp()
@@ -225,7 +232,7 @@ shipments_df.to_csv(
 # ---------------------------------------------------------
 # IoT Telemetry (NDJSON for streaming simulation)
 # ---------------------------------------------------------
-print("Generating IoT telemetry (NDJSON)...")
+logger.info("Generating IoT telemetry (NDJSON)...")
 v_ids = np.random.choice(vehicle_ids, NUM_TELEMETRY)
 latitudes = np.round(np.random.uniform(25.0, 49.0, NUM_TELEMETRY), 4)
 longitudes = np.round(np.random.uniform(-125.0, -67.0, NUM_TELEMETRY), 4)
@@ -252,7 +259,7 @@ with open(
 # ---------------------------------------------------------
 # Supplier Invoices (XML)
 # ---------------------------------------------------------
-print("Generating XML invoices...")
+logger.info("Generating XML invoices...")
 with open(
     os.path.join(SEMI_STRUCTURED_DIR, 'supplier_invoices.xml'), 'w'
 ) as f:
@@ -269,7 +276,7 @@ with open(
 # ---------------------------------------------------------
 # Unstructured Text Documents
 # ---------------------------------------------------------
-print("Generating maintenance reports...")
+logger.info("Generating maintenance reports...")
 os.makedirs(
     os.path.join(UNSTRUCTURED_DIR, 'maintenance_reports'), exist_ok=True
 )
@@ -286,4 +293,4 @@ for i in range(100):
         f.write("- " + fake.sentence() + "\n")
         f.write("Status: Resolved\n")
 
-print("Data generation completed successfully!")
+logger.info(f"Synthetic data generation complete. All files saved to {output_dir}")

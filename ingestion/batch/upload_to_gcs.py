@@ -3,8 +3,15 @@ Uploads local data files to GCS, creating the Data Lake zone
 structure (raw/structured, raw/semi_structured, raw/unstructured).
 """
 import os
+import sys
 from google.cloud import storage
 from google.api_core.exceptions import Conflict
+
+# Add project root to sys.path so we can import utils
+sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+from utils.logger import get_logger
+
+logger = get_logger("upload_to_gcs")
 
 PROJECT_ID = "supply-chain-logistics-508517"
 BUCKET_NAME = f"enterprise-logistics-data-lake-{PROJECT_ID}"
@@ -21,14 +28,14 @@ def create_bucket_if_not_exists(storage_client):
     try:
         bucket = storage_client.bucket(BUCKET_NAME)
         if not bucket.exists():
-            print(f"Creating bucket {BUCKET_NAME}...")
+            logger.info(f"Creating bucket {BUCKET_NAME}...")
             bucket = storage_client.create_bucket(bucket, location=LOCATION)
-            print(f"Bucket {bucket.name} created.")
+            logger.info(f"Bucket {bucket.name} created.")
         else:
-            print(f"Bucket {BUCKET_NAME} already exists.")
+            logger.info(f"Bucket {BUCKET_NAME} already exists.")
         return bucket
     except Conflict:
-        print(f"Bucket {BUCKET_NAME} already exists.")
+        logger.info(f"Bucket {BUCKET_NAME} already exists.")
         return storage_client.bucket(BUCKET_NAME)
 
 
@@ -46,7 +53,7 @@ def create_folders(bucket):
         blob = bucket.blob(folder)
         if not blob.exists():
             blob.upload_from_string('')
-            print(f"Created folder prefix: {folder}")
+            logger.info(f"Created folder prefix: {folder}")
 
 
 def upload_local_directory_to_gcs(bucket, local_path, gcs_prefix):
@@ -62,33 +69,33 @@ def upload_local_directory_to_gcs(bucket, local_path, gcs_prefix):
 
             blob = bucket.blob(gcs_blob_path)
             if not blob.exists():
-                print(
+                logger.info(
                     f"Uploading {local_file_path} "
                     f"to gs://{BUCKET_NAME}/{gcs_blob_path}..."
                 )
                 blob.upload_from_filename(local_file_path)
             else:
-                print(f"Skipping {gcs_blob_path}, already exists.")
+                logger.info(f"Skipping {gcs_blob_path}, already exists.")
 
 
 if __name__ == "__main__":
-    print(f"Connecting to GCP Project: {PROJECT_ID}")
+    logger.info(f"Connecting to GCP Project: {PROJECT_ID}")
     try:
         client = storage.Client(project=PROJECT_ID)
     except Exception as e:
-        print(
+        logger.error(
             "Failed to initialize GCP Client. "
             "Ensure you are logged in via 'gcloud auth application-default login'. "
             f"Error: {e}"
         )
-        exit(1)
+        sys.exit(1)
 
     bucket = create_bucket_if_not_exists(client)
 
-    print("Setting up Data Lake zones...")
+    logger.info("Setting up Data Lake zones...")
     create_folders(bucket)
 
-    print("Uploading synthetic data to the raw/ zone...")
+    logger.info("Uploading synthetic data to the raw/ zone...")
     upload_local_directory_to_gcs(bucket, DATA_DIR, 'raw/')
 
-    print("Data Lake setup and upload complete!")
+    logger.info("Data Lake setup and upload complete!")

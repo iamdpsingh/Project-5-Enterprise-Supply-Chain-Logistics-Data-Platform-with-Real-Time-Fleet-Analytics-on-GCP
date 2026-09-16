@@ -1,38 +1,35 @@
-@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
 :root {
-  /* Google Cloud / Material Design Palette (Light Theme) */
-  --bg-primary: #f8f9fa; /* Light gray background */
-  --bg-secondary: #ffffff; /* White panels */
-  --bg-panel: #ffffff;
+  /* Premium Dark Theme Palette */
+  --bg-primary: #000000; /* True black */
+  --bg-secondary: #0a0a0a; /* Very dark gray */
+  --bg-panel: rgba(15, 15, 17, 0.6); /* Translucent panel */
   
-  --text-primary: #202124; /* Google dark gray */
-  --text-secondary: #5f6368; /* Google medium gray */
-  --text-muted: #80868b;
+  --text-primary: #ffffff; 
+  --text-secondary: #a1a1aa; /* Zinc 400 */
+  --text-muted: #52525b; /* Zinc 600 */
   
-  --accent-primary: #1a73e8; /* Google Blue */
-  --accent-glow: rgba(26, 115, 232, 0.15);
+  --accent-primary: #3b82f6; /* Electric Blue */
+  --accent-secondary: #8b5cf6; /* Neon Purple */
+  --accent-glow: rgba(59, 130, 246, 0.15);
   
-  --status-success: #1e8e3e; /* Google Green */
-  --status-warning: #f9ab00; /* Google Yellow */
-  --status-danger: #d93025; /* Google Red */
-  --status-info: #1a73e8;
+  --status-success: #10b981; /* Emerald */
+  --status-warning: #f59e0b; /* Amber */
+  --status-danger: #ef4444; /* Rose */
+  --status-info: #3b82f6;
 
-  --border-color: #dadce0;
-  --border-highlight: #bdc1c6;
+  --border-color: rgba(255, 255, 255, 0.1);
+  --border-highlight: rgba(255, 255, 255, 0.2);
   
   /* Metrics */
-  --border-radius-sm: 4px;
-  --border-radius-md: 8px;
-  --border-radius-lg: 12px;
-  --border-radius-xl: 16px;
-  
-  /* Material Elevation Shadows */
-  --shadow-sm: 0 1px 2px 0 rgba(60,64,67,0.3), 0 1px 3px 1px rgba(60,64,67,0.15);
-  --shadow-md: 0 1px 3px 0 rgba(60,64,67,0.3), 0 4px 8px 3px rgba(60,64,67,0.15);
+  --border-radius-sm: 6px;
+  --border-radius-md: 12px;
+  --border-radius-lg: 16px;
+  --border-radius-xl: 24px;
   
   --transition-fast: 0.15s ease;
-  --transition-normal: 0.25s cubic-bezier(0.4, 0.0, 0.2, 1); /* Material easing */
+  --transition-normal: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 * {
@@ -42,53 +39,78 @@
 }
 
 body {
-  font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
   background-color: var(--bg-primary);
+  background-image: 
+    radial-gradient(circle at 15% 50%, rgba(59, 130, 246, 0.08) 0%, transparent 50%),
+    radial-gradient(circle at 85% 30%, rgba(139, 92, 246, 0.08) 0%, transparent 50%);
   color: var(--text-primary);
   line-height: 1.5;
   min-height: 100vh;
   overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 /* Custom Scrollbar */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
 }
 ::-webkit-scrollbar-track {
   background: var(--bg-primary);
 }
 ::-webkit-scrollbar-thumb {
-  background: var(--border-highlight);
+  background: var(--text-muted);
   border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--text-muted);
+  background: var(--text-secondary);
 }
 
 /* Utilities */
 .glass-panel {
   background: var(--bg-panel);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   border: 1px solid var(--border-color);
   border-radius: var(--border-radius-md);
-  box-shadow: var(--shadow-sm);
-  transition: box-shadow var(--transition-normal), transform var(--transition-fast);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+  transition: border-color var(--transition-normal), transform var(--transition-fast), box-shadow var(--transition-normal);
 }
 
 .glass-panel:hover {
-  box-shadow: var(--shadow-md);
-  transform: translateY(-1px);
+  border-color: var(--border-highlight);
+  box-shadow: 0 4px 30px var(--accent-glow);
+  transform: translateY(-2px);
 }
 
 .heading-gradient {
-  color: var(--text-primary); /* Remove gradient for cleaner Google look */
-  font-weight: 500;
+  background: linear-gradient(to right, #ffffff, #a1a1aa);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+/* Animations */
+@keyframes pulse-dot {
+  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+  70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
+  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+}
+
+@keyframes scanning-line {
+  0% { top: 0; opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { top: 100%; opacity: 0; }
 }
 
 /* Typography */
 h1, h2, h3, h4, h5, h6 {
-  font-weight: 500;
-  letter-spacing: 0.2px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
 }
 
 /* Layout */
@@ -100,8 +122,9 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .sidebar {
-  width: 260px;
-  background-color: var(--bg-secondary);
+  width: 280px;
+  background-color: rgba(10, 10, 10, 0.8);
+  backdrop-filter: blur(20px);
   border-right: 1px solid var(--border-color);
   display: flex;
   flex-direction: column;
@@ -112,9 +135,8 @@ h1, h2, h3, h4, h5, h6 {
 .main-content {
   flex: 1;
   overflow-y: auto;
-  padding: 2rem 3rem;
+  padding: 2.5rem 3.5rem;
   display: flex;
   flex-direction: column;
   gap: 2rem;
-  background-color: var(--bg-primary);
 }

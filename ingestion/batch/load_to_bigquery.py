@@ -2,7 +2,15 @@
 Loads data from GCS into BigQuery's Bronze (raw) layer.
 Supports both CSV and NDJSON source formats with schema autodetection.
 """
+import sys
+import os
 from google.cloud import bigquery
+
+# Add project root to sys.path so we can import utils
+sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+from utils.logger import get_logger
+
+logger = get_logger("load_to_bigquery")
 
 PROJECT_ID = "supply-chain-logistics-508517"
 BUCKET = f"enterprise-logistics-data-lake-{PROJECT_ID}"
@@ -41,12 +49,12 @@ def load_table(client: bigquery.Client, table_name: str, gcs_path: str):
     if source_format == bigquery.SourceFormat.CSV:
         job_config.skip_leading_rows = 1
 
-    print(f"Loading {uri} -> {table_id}...")
+    logger.info(f"Loading {uri} -> {table_id}...")
     load_job = client.load_table_from_uri(uri, table_id, job_config=job_config)
     load_job.result()
 
     table = client.get_table(table_id)
-    print(f"  OK  {table_name}: {table.num_rows} rows loaded.")
+    logger.info(f"  OK  {table_name}: {table.num_rows} rows loaded.")
 
 
 def main():
@@ -55,12 +63,12 @@ def main():
     dataset_ref = bigquery.Dataset(f"{PROJECT_ID}.{BRONZE_DATASET}")
     dataset_ref.location = "US"
     client.create_dataset(dataset_ref, exists_ok=True)
-    print(f"Dataset {BRONZE_DATASET} ready.\n")
+    logger.info(f"Dataset {BRONZE_DATASET} ready.\n")
 
     for table_name, gcs_path in TABLES.items():
         load_table(client, table_name, gcs_path)
 
-    print("\nAll Bronze tables loaded into BigQuery.")
+    logger.info("\nAll Bronze tables loaded into BigQuery.")
 
 
 if __name__ == "__main__":

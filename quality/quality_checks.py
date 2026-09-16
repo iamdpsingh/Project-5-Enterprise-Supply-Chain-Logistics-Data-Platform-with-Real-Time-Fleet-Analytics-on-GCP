@@ -3,7 +3,15 @@ Data quality checks against BigQuery Silver tables.
 Validates nulls, ranges, duplicates, and business rules,
 then prints a pass/fail report.
 """
+import sys
+import os
 from google.cloud import bigquery
+
+# Add project root to sys.path so we can import utils
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from utils.logger import get_logger
+
+logger = get_logger("quality_checks")
 from dataclasses import dataclass
 from typing import List
 
@@ -78,9 +86,9 @@ def run_checks():
     failed = 0
 
     separator = "=" * 60
-    print(separator)
-    print("Data Quality Report")
-    print(separator + "\n")
+    logger.info(separator)
+    logger.info("Data Quality Report")
+    logger.info(separator + "\n")
 
     for check in CHECKS:
         result = client.query(check.query).result()
@@ -89,15 +97,15 @@ def run_checks():
         if failures <= check.threshold:
             passed += 1
             status = "PASS"
+            logger.info(f"  {status}  {check.name} (failures: {failures})")
         else:
             failed += 1
             status = "FAIL"
+            logger.error(f"  {status}  {check.name} (failures: {failures})")
 
-        print(f"  {status}  {check.name} (failures: {failures})")
-
-    print(f"\n{separator}")
-    print(f"Results: {passed} passed, {failed} failed out of {len(CHECKS)} checks.")
-    print(separator)
+    logger.info(f"\n{separator}")
+    logger.info(f"Results: {passed} passed, {failed} failed out of {len(CHECKS)} checks.")
+    logger.info(separator)
 
 
 if __name__ == "__main__":
