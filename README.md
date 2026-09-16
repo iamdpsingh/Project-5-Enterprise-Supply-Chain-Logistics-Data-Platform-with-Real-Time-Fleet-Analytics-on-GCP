@@ -33,31 +33,31 @@ The pipeline implements the **Medallion Architecture** (Bronze ➔ Silver ➔ Go
 
 ```mermaid
 graph TD
-    subgraph 1. Data Sources
+    subgraph Sources [1. Data Sources]
         CSV[Structured CSVs]
         JSON[Semi-Structured JSON/XML]
         TXT[Unstructured Text]
         IoT[IoT Fleet Simulator]
     end
 
-    subgraph 2. Ingestion & Streaming (GCP)
+    subgraph Ingestion [2. Ingestion & Streaming GCP]
         GCS[Cloud Storage Data Lake]
         PS[Pub/Sub]
         DF[Dataflow Streaming]
     end
 
-    subgraph 3. Processing & Medallion Warehouse
-        BQ_B[(BigQuery Bronze<br/>Raw)]
-        BQ_S[(BigQuery Silver<br/>Clean/Typed)]
-        BQ_G[(BigQuery Gold<br/>Star Schema)]
+    subgraph Processing [3. Processing & Medallion Warehouse]
+        BQ_B[(BigQuery Bronze Raw)]
+        BQ_S[(BigQuery Silver Clean/Typed)]
+        BQ_G[(BigQuery Gold Star Schema)]
         DBT[dbt Transformations]
         Spark[PySpark Processing]
     end
     
-    subgraph 4. Serving & Analytics
-        BQ_ML[BigQuery ML<br/>Delay Prediction]
-        FS[(Firestore<br/>Real-Time State)]
-        APP[Next.js Control Tower<br/>Dashboard]
+    subgraph Serving [4. Serving & Analytics]
+        BQ_ML[BigQuery ML Delay Prediction]
+        FS[(Firestore Real-Time State)]
+        APP[Next.js Control Tower Dashboard]
     end
 
     %% Batch Flow
